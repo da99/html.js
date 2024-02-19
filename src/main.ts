@@ -1,18 +1,16 @@
 
 
-/*
-  * a("https://some.url", "My Text")
-  * a('.red#ID', "https://some.url", "My Text")
-  * a("https://some.url", span("My Text"))
-*/
-  
+
+interface HtmlAttributes { [key: string]: string | URL  }
+type ElementArg = string | HtmlAttributes | HTMLElement ;
+
 const ObjectPrototype = Object.getPrototypeOf({});
 
-function is_class_id(x) {
+function is_class_id(x: unknown) {
   return typeof x === 'string' && (x.indexOf('.') == 0 || x.indexOf('#') == 0);
 }
 
-function is_url(x) {
+function is_url(x: unknown) {
   if (typeof x !== 'string')
     return null;
   try {
@@ -22,9 +20,14 @@ function is_url(x) {
   }
 }
 
-export function a(...args) {
-  const new_attrs = {};
-  const new_args =['', new_attrs];
+/*
+  * a("https://some.url", "My Text")
+  * a('.red#ID', "https://some.url", "My Text")
+  * a("https://some.url", span("My Text"))
+*/
+export function a(...args: ElementArg[] ) {
+  const new_attrs : HtmlAttributes = {};
+  const new_args : ElementArg[] = ['', new_attrs];
   let i = 0
   for (const x of args) {
     if (typeof x === 'string') {
