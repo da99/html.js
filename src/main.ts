@@ -52,7 +52,7 @@ export function a(...args: ElementArg[] ) {
   * element('a', '.red#ID', {href: "https://some.url"}, "My Text")
   * element('a', span("My Text"))
 */
-export function element(tag_name, ...pieces) {
+export function element(tag_name, ...pieces : ElementArg[]) {
   const e = document.createElement(tag_name);
   pieces.forEach((x, i) => {
     if (typeof x === "string") {
