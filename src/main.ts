@@ -1,23 +1,37 @@
 
 
 
-interface HtmlAttributes { [key: string]: string | URL  }
-type ElementArg = string | HtmlAttributes | HTMLElement ;
-
 const ObjectPrototype = Object.getPrototypeOf({});
 
 function is_class_id(x: unknown) {
   return typeof x === 'string' && (x.indexOf('.') == 0 || x.indexOf('#') == 0);
 }
 
-function is_url(x: unknown) {
+const URLish = /^[a-z]:\/\//i;
+function is_urlish(x: unknown) {
   if (typeof x !== 'string')
-    return null;
-  try {
-    return new URL(x);
-  } catch (_e) {
-    return null;
+    return false;
+
+  return URLish.test(x);
+}
+
+function set_class(e: Node, target: string) {
+
+  let curr = '';
+  for (const s of x.split(/(\.|\#)/g) ) {
+    switch (curr) {
+      case '':
+        break;
+      case '.':
+      case '#':
+        curr = s;
+        break;
+      default:
+        e.classList.add(s);
+    } // switch
   }
+  
+  return e;
 }
 
 /*
@@ -25,21 +39,21 @@ function is_url(x: unknown) {
   * a('.red#ID', "https://some.url", "My Text")
   * a("https://some.url", span("My Text"))
 */
-export function a(...args: ElementArg[] ) {
-  const new_attrs : HtmlAttributes = {};
-  const new_args : ElementArg[] = ['', new_attrs];
+export function a(...args: (string | HTMLElement)[] ) {
+  const new_args : (string | Partial<HTMLAnchorElement>)[] = [''];
   let i = 0
   for (const x of args) {
     if (typeof x === 'string') {
       if (i === 0 && is_class_id(x)) {
-        new_args[0] = x;
+        new_args.push(x);
         continue;
       }
-      const new_url = is_url(x);
-      if (new_url) {
-        new_attrs['href'] = new_url;
+      if (is_urlish(x)) {
+        new_args.push({href: x})
         continue;
       }
+      new_args.push(x);
+      continue
     }
     new_args.push(x);
     ++i;
@@ -52,7 +66,7 @@ export function a(...args: ElementArg[] ) {
   * element('a', '.red#ID', {href: "https://some.url"}, "My Text")
   * element('a', span("My Text"))
 */
-export function element(tag_name, ...pieces : ElementArg[]) {
+export function element(tag_name: keyof HTMLElementTagNameMap, ...pieces : (string | Element | Partial<HTMLAnchorElement>)[]) {
   const e = document.createElement(tag_name);
   pieces.forEach((x, i) => {
     if (typeof x === "string") {
@@ -62,7 +76,7 @@ export function element(tag_name, ...pieces : ElementArg[]) {
     }
     if (typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype)
       return set_attrs(e, x);
-    e.appendChild(x);
+    e.appendChild(x as Node);
   });
   return e;
 } // export function
