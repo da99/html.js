@@ -15,10 +15,10 @@ function is_urlish(x: unknown) {
   return URLish.test(x);
 }
 
-function set_class(e: Node, target: string) {
+function set_class(e: HTMLElement, new_class: string) {
 
   let curr = '';
-  for (const s of x.split(/(\.|\#)/g) ) {
+  for (const s of new_class.split(/(\.|\#)/g) ) {
     switch (curr) {
       case '':
         break;
@@ -27,11 +27,18 @@ function set_class(e: Node, target: string) {
         curr = s;
         break;
       default:
-        e.classList.add(s);
+        switch (curr) {
+          case '.':
+            e.classList.add(s);
+            break;
+          case '#':
+            e.setAttribute('id', s);
+            break;
+        }
     } // switch
   }
-  
-  return e;
+ 
+ return e;
 }
 
 /*
@@ -76,14 +83,25 @@ export function element(tag_name: keyof HTMLElementTagNameMap, ...pieces : (stri
     }
     if (typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype)
       return set_attrs(e, x);
-    e.appendChild(x as Node);
+    e.appendChild(x as HTMLElement);
   });
   return e;
 } // export function
 
-function set_attrs(ele, attrs) {
+function set_attrs(ele: HTMLElement, attrs: Partial<HTMLElement | HTMLAnchorElement>) {
   for (const k in attrs) {
-    ele.setAttribute(k, attrs[k]);
+    switch (k) {
+      case 'href':
+        try {
+          ele.setAttribute(k, (new URL(attrs['href'])).toString());
+        } catch (e) {
+          console.warn("Invalid url.")
+        }
+        break;
+      default:
+        ele.setAttribute(k, attrs[k]);
+
+    } // switch
   }
   return ele;
 }
