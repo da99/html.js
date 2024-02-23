@@ -1,20 +1,21 @@
 
 
 
-const ObjectPrototype = Object.getPrototypeOf({});
 type Attributes = Partial<HTMLElement | HTMLAnchorElement>;
 
-function is_class_id(x: unknown) {
-  return typeof x === 'string' && (x.indexOf('.') == 0 || x.indexOf('#') == 0);
+const URLish = /^[a-z]:\/\//i;
+const ObjectPrototype = Object.getPrototypeOf({});
+
+function is_class_id(x: unknown): boolean {
+  return typeof x === 'string' && (x.indexOf('.') === 0 || x.indexOf('#') === 0);
 }
 
-const URLish = /^[a-z]:\/\//i;
 function is_urlish(x: unknown) {
   if (typeof x !== 'string')
     return false;
 
   return URLish.test(x);
-}
+} // func
 
 function set_class(e: HTMLElement, new_class: string) {
 
@@ -40,7 +41,7 @@ function set_class(e: HTMLElement, new_class: string) {
   }
  
  return e;
-}
+} // func
 
 /*
   * a("https://some.url", "My Text")
@@ -231,3 +232,6 @@ export function span(...args) {
 // console.log(nodes);
 // document.getElementById("the_body").appendChild(nodes);
 //
+/*
+  *
+  */
