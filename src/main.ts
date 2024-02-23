@@ -2,6 +2,7 @@
 
 
 const ObjectPrototype = Object.getPrototypeOf({});
+type Attributes = Partial<HTMLElement | HTMLAnchorElement>;
 
 function is_class_id(x: unknown) {
   return typeof x === 'string' && (x.indexOf('.') == 0 || x.indexOf('#') == 0);
@@ -46,8 +47,8 @@ function set_class(e: HTMLElement, new_class: string) {
   * a('.red#ID', "https://some.url", "My Text")
   * a("https://some.url", span("My Text"))
 */
-export function a(...args: (string | HTMLElement)[] ) {
-  const new_args : (string | Partial<HTMLAnchorElement>)[] = [''];
+export function a(...args: (string | Element)[] ) {
+  const new_args : (string | Attributes)[] = [];
   let i = 0
   for (const x of args) {
     if (typeof x === 'string') {
@@ -73,7 +74,7 @@ export function a(...args: (string | HTMLElement)[] ) {
   * element('a', '.red#ID', {href: "https://some.url"}, "My Text")
   * element('a', span("My Text"))
 */
-export function element(tag_name: keyof HTMLElementTagNameMap, ...pieces : (string | Element | Partial<HTMLAnchorElement>)[]) {
+export function element(tag_name: keyof HTMLElementTagNameMap, ...pieces : (string | Element | Attributes)[]) {
   const e = document.createElement(tag_name);
   pieces.forEach((x, i) => {
     if (typeof x === "string") {
@@ -83,12 +84,12 @@ export function element(tag_name: keyof HTMLElementTagNameMap, ...pieces : (stri
     }
     if (typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype)
       return set_attrs(e, x);
-    e.appendChild(x as HTMLElement);
+    e.appendChild(x as Element);
   });
   return e;
 } // export function
 
-function set_attrs(ele: HTMLElement, attrs: Partial<HTMLElement | HTMLAnchorElement>) {
+function set_attrs(ele: Element, attrs: Attributes) {
   for (const k in attrs) {
     switch (k) {
       case 'href':
