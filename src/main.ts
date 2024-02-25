@@ -1,9 +1,7 @@
 
-
-
 type Attributes = Partial<HTMLElement | HTMLAnchorElement>;
 
-const URLish = /^[a-z]:\/\//i;
+const VALID_PROTO = /^(http|https|ssh|ftp|sftp|gopher):\/\//i;
 const ObjectPrototype = Object.getPrototypeOf({});
 const SPLIT_TAG_NAME = /([\.\#])([^\.\#]+)/g
 
@@ -15,7 +13,7 @@ export function is_urlish(x: unknown) {
   if (typeof x !== 'string')
     return false;
 
-  return URLish.test(x);
+  return VALID_PROTO.test(x.toLowerCase());
 } // func
 
 export function fragment(...eles: (string | Element)[]) {
