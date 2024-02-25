@@ -35,7 +35,7 @@ export function split_tag_name(new_class: string): Element {
     switch (s) {
       case '.':
       case '#':
-        curr = s
+        curr = s;
         break;
       case '':
         // ignore
