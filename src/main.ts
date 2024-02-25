@@ -20,9 +20,13 @@ function is_url(x: unknown) {
   }
 }
 
+function is_plain_object(x: unknown) {
+  return typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype;
+}
+
 /*
-  * a("https://some.url", "My Text")
   * a('.red#ID', "https://some.url", "My Text")
+  * a("https://some.url", "My Text")
   * a("https://some.url", span("My Text"))
 */
 export function a(...args: ElementArg[] ) {
@@ -48,9 +52,10 @@ export function a(...args: ElementArg[] ) {
 }
 
 /*
-  * element('a', {href: "https://some.url"}, "My Text")
+  * element('input', {name: "_something"}, "My Text")
   * element('a', '.red#ID', {href: "https://some.url"}, "My Text")
-  * element('a', span("My Text"))
+  * element('div', span("My Text"))
+  * element('div', '#main', span("My Text"))
 */
 export function element(tag_name, ...pieces) {
   const e = document.createElement(tag_name);
