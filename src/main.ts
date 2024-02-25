@@ -28,7 +28,7 @@ export function fragment(...eles: (string | Element)[]) {
   return dom_fragment;
 }
 
-function split_tag_name(new_class: string): Element {
+export function split_tag_name(new_class: string): Element {
   let e: Element | null = null;
   let curr = '';
   for (const s of new_class.split(SPLIT_TAG_NAME) ) {
@@ -36,6 +36,9 @@ function split_tag_name(new_class: string): Element {
       case '.':
       case '#':
         curr = s
+        break;
+      case '':
+        // ignore
         break;
       default:
         switch (curr) {
