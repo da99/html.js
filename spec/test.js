@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { element as E, is_urlish, is_plain_object, split_tag_name } from '../src/main.ts';
+import { element as E, body, is_urlish, is_plain_object, split_tag_name } from '../src/main.ts';
 
 describe('helper functions', function () {
   describe('is_urlish', function () {
@@ -71,4 +71,17 @@ describe('element', function () {
     const x = E('div', E('p', 'hello'), E('p', 'world'));
     assert.equal(x.innerHTML, '<p>hello</p><p>world</p>');
   });
-})
+});
+
+describe('body', function () {
+  it('returns the body', function () {
+    const b = body(E('p', 'hello world 1'));
+    assert.equal(b, document.body);
+  });
+
+  it('appends the elements to the body', function () {
+    const p = E('p#h2', 'hello world 2');
+    const b = body(p);
+    assert.equal(p, document.body.children[document.body.children.length - 1]);
+  });
+});

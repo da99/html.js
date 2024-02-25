@@ -28,6 +28,11 @@ export function fragment(...eles: (string | Element)[]) {
   return dom_fragment;
 }
 
+export function body(...eles: (string | Element)[]) {
+  document.body.append(fragment(...eles));
+  return document.body;
+}
+
 export function split_tag_name(new_class: string): Element {
   let e: Element | null = null;
   let curr = '';
@@ -89,7 +94,7 @@ function set_attrs(ele: Element, attrs: Attributes) {
 */
 export function element(tag_name: string, ...pieces : (string | Element | Attributes)[]) {
   const e = split_tag_name(tag_name);
-  pieces.forEach((x, i) => {
+  pieces.forEach((x, _i) => {
     if (typeof x === "string")
       return e.appendChild(document.createTextNode(x));
     if (is_plain_object(x))
