@@ -1,24 +1,47 @@
 
 
 
-interface HtmlAttributes { [key: string]: string | URL  }
-type ElementArg = string | HtmlAttributes | HTMLElement ;
+type Attributes = Partial<HTMLElement | HTMLAnchorElement>;
 
+const URLish = /^[a-z]:\/\//i;
 const ObjectPrototype = Object.getPrototypeOf({});
 
-function is_class_id(x: unknown) {
-  return typeof x === 'string' && (x.indexOf('.') == 0 || x.indexOf('#') == 0);
+function is_class_id(x: unknown): boolean {
+  return typeof x === 'string' && (x.indexOf('.') === 0 || x.indexOf('#') === 0);
 }
 
-function is_url(x: unknown) {
+function is_urlish(x: unknown) {
   if (typeof x !== 'string')
-    return null;
-  try {
-    return new URL(x);
-  } catch (_e) {
-    return null;
+    return false;
+
+  return URLish.test(x);
+} // func
+
+function set_class(e: HTMLElement, new_class: string) {
+
+  let curr = '';
+  for (const s of new_class.split(/(\.|\#)/g) ) {
+    switch (curr) {
+      case '':
+        break;
+      case '.':
+      case '#':
+        curr = s;
+        break;
+      default:
+        switch (curr) {
+          case '.':
+            e.classList.add(s);
+            break;
+          case '#':
+            e.setAttribute('id', s);
+            break;
+        }
+    } // switch
   }
-}
+ 
+ return e;
+} // func
 
 function is_plain_object(x: unknown) {
   return typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype;
@@ -29,21 +52,21 @@ function is_plain_object(x: unknown) {
   * a("https://some.url", "My Text")
   * a("https://some.url", span("My Text"))
 */
-export function a(...args: ElementArg[] ) {
-  const new_attrs : HtmlAttributes = {};
-  const new_args : ElementArg[] = ['', new_attrs];
+export function a(...args: (string | Element)[] ) {
+  const new_args : (string | Attributes)[] = [];
   let i = 0
   for (const x of args) {
     if (typeof x === 'string') {
       if (i === 0 && is_class_id(x)) {
-        new_args[0] = x;
+        new_args.push(x);
         continue;
       }
-      const new_url = is_url(x);
-      if (new_url) {
-        new_attrs['href'] = new_url;
+      if (is_urlish(x)) {
+        new_args.push({href: x})
         continue;
       }
+      new_args.push(x);
+      continue
     }
     new_args.push(x);
     ++i;
@@ -57,7 +80,7 @@ export function a(...args: ElementArg[] ) {
   * element('div', span("My Text"))
   * element('div', '#main', span("My Text"))
 */
-export function element(tag_name, ...pieces) {
+export function element(tag_name: keyof HTMLElementTagNameMap, ...pieces : (string | Element | Attributes)[]) {
   const e = document.createElement(tag_name);
   pieces.forEach((x, i) => {
     if (typeof x === "string") {
@@ -67,14 +90,25 @@ export function element(tag_name, ...pieces) {
     }
     if (typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype)
       return set_attrs(e, x);
-    e.appendChild(x);
+    e.appendChild(x as Element);
   });
   return e;
 } // export function
 
-function set_attrs(ele, attrs) {
+function set_attrs(ele: Element, attrs: Attributes) {
   for (const k in attrs) {
-    ele.setAttribute(k, attrs[k]);
+    switch (k) {
+      case 'href':
+        try {
+          ele.setAttribute(k, (new URL(attrs['href'])).toString());
+        } catch (e) {
+          console.warn("Invalid url.")
+        }
+        break;
+      default:
+        ele.setAttribute(k, attrs[k]);
+
+    } // switch
   }
   return ele;
 }
@@ -203,3 +237,6 @@ export function span(...args) {
 // console.log(nodes);
 // document.getElementById("the_body").appendChild(nodes);
 //
+/*
+  *
+  */
