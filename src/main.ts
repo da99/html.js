@@ -5,95 +5,58 @@ type Attributes = Partial<HTMLElement | HTMLAnchorElement>;
 
 const URLish = /^[a-z]:\/\//i;
 const ObjectPrototype = Object.getPrototypeOf({});
+const SPLIT_TAG_NAME = /([\.\#])([^\.\#]+)/g
 
-function is_class_id(x: unknown): boolean {
-  return typeof x === 'string' && (x.indexOf('.') === 0 || x.indexOf('#') === 0);
-}
+// export function safe_uri(x: string) { return {content: x, type: "Safe"}; }
+export function is_func(x: unknown) { return typeof x === "function"; }
+export function is_plain_object(x: unknown) { return typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype; }
 
-function is_urlish(x: unknown) {
+export function is_urlish(x: unknown) {
   if (typeof x !== 'string')
     return false;
 
   return URLish.test(x);
 } // func
 
-function set_class(e: HTMLElement, new_class: string) {
+export function fragment(...eles: (string | Element)[]) {
+  let dom_fragment = document.createDocumentFragment();
+  for (const x of eles) {
+    if (typeof x === 'string')
+      dom_fragment.appendChild(document.createTextNode(x));
+    else
+      dom_fragment.appendChild(x);
+  }
 
+  return dom_fragment;
+}
+
+function split_tag_name(new_class: string): Element {
+  let e: Element | null = null;
   let curr = '';
-  for (const s of new_class.split(/(\.|\#)/g) ) {
-    switch (curr) {
-      case '':
-        break;
+  for (const s of new_class.split(SPLIT_TAG_NAME) ) {
+    switch (s) {
       case '.':
       case '#':
-        curr = s;
+        curr = s
         break;
       default:
         switch (curr) {
-          case '.':
-            e.classList.add(s);
-            break;
-          case '#':
-            e.setAttribute('id', s);
-            break;
-        }
-    } // switch
+        case '.':
+          e?.classList.add(s);
+          break;
+        case '#':
+          e?.setAttribute('id', s);
+          break;
+        default:
+          e = document.createElement(s);
+      }
+    }
   }
  
- return e;
-} // func
-
-function is_plain_object(x: unknown) {
-  return typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype;
-}
-
-/*
-  * a('.red#ID', "https://some.url", "My Text")
-  * a("https://some.url", "My Text")
-  * a("https://some.url", span("My Text"))
-*/
-export function a(...args: (string | Element)[] ) {
-  const new_args : (string | Attributes)[] = [];
-  let i = 0
-  for (const x of args) {
-    if (typeof x === 'string') {
-      if (i === 0 && is_class_id(x)) {
-        new_args.push(x);
-        continue;
-      }
-      if (is_urlish(x)) {
-        new_args.push({href: x})
-        continue;
-      }
-      new_args.push(x);
-      continue
-    }
-    new_args.push(x);
-    ++i;
-  }
-  return element('a', ...new_args);
-}
-
-/*
-  * element('input', {name: "_something"}, "My Text")
-  * element('a', '.red#ID', {href: "https://some.url"}, "My Text")
-  * element('div', span("My Text"))
-  * element('div', '#main', span("My Text"))
-*/
-export function element(tag_name: keyof HTMLElementTagNameMap, ...pieces : (string | Element | Attributes)[]) {
-  const e = document.createElement(tag_name);
-  pieces.forEach((x, i) => {
-    if (typeof x === "string") {
-      if (i === 0 && is_class_id(x))
-        return set_class(e, x);
-      return e.appendChild(document.createTextNode(x));
-    }
-    if (typeof x === 'object' && Object.getPrototypeOf(x) === ObjectPrototype)
-      return set_attrs(e, x);
-    e.appendChild(x as Element);
-  });
+  if (!e)
+    throw `Invalid syntax for element creation: ${new_class}`;
   return e;
-} // export function
+} // func
 
 function set_attrs(ele: Element, attrs: Attributes) {
   for (const k in attrs) {
@@ -112,131 +75,27 @@ function set_attrs(ele: Element, attrs: Attributes) {
   }
   return ele;
 }
-// function div() {
-//   const node = document.createElement("div");
-//   function push(x) {
-//     if (is_string(x))
-//       node.appendChild(document.createTextNode(x));
-//     else
-//       node.appendChild(x);
-//   }
-//   for_each(arguments, function (x) {
-//     if (is_func(x))
-//       x(push);
-//     else {
-//       push(x);
-//     }
-//   });
-//   return node;
-// }
 
-export function span(...args) {
-  return element('span', ...args);
-}
-
-// function HTML() {
-//   this.elements = [];
-// } // html
-//
-// HTML.prototype.br = function br() {
-//   this.elements.push(document.createElement("br"));
-// }
-//
-// HTML.prototype.insert_into = function insert_into(target) {
-//   this.elements.forEach(function (x) {
-//     target.appendChild(x);
-//   });
-// }
-//
-// HTML.prototype.div = function div() {
-//   const the_div = document.createElement("div");
-//   const texts = arguments[0];
-//   for (var i = 0, j = texts.length; i < j; i++) {
-//     the_div.appendChild(document.createTextNode(texts[i]));
-//     the_div.appendChild(document.createElement("br"));
-//   }
-//   this.elements.push(the_div);
-//   return the_div;
-// }
-//
-// //
-// // ------------------------------------------------------------
-// //
-//
-// function safe_uri(x) {
-//   return {content: x, type: "Safe"};
-// }
-//
-// let data = {
-//   title: "hello",
-//   stuff: [
-//     "hi",
-//     "yo",
-//     "Good Morning!'\""
-//   ],
-//   uri: "google.com"
-// };
-//
-// function for_each(args, body) {
-//   for (var i = 0, j = args.length; i < j; i++) {
-//     body(args[i]);
-//   }
-//   return args;
-// }
-//
-// function is_func(x) {
-//   return typeof x === "function";
-// }
-//
-// function _href(x) {
-//   return {is_href: true, content: "https://" + x};
-// }
-//
-// function is_string(x) {
-//   return typeof x === "string";
-// }
-//
-// function new_fragment() {
-//   let dom_fragment = document.createDocumentFragment();
-//   function push(x) {
-//     dom_fragment.appendChild(x);
-//   }
-//   for_each(arguments, function (x) {
-//     if (is_func(x)) {
-//       x(push);
-//     } else {
-//       dom_fragment.appendChild(x);
-//     }
-//   });
-//
-//   return dom_fragment;
-// }
-//
-// function br() {
-//   return document.createElement("br");
-// }
-//
-// let nodes = new_fragment(function (p) {
-//   p(br());
-//   p(a(_href(data.uri)));
-//   p(br());
-//   p(a(_href(data.uri)));
-//   p(
-//
-//     div(function(p){
-//       p(span(data.title));
-//       p(br());
-//       p(span("good bye"));
-//       p(br());
-//       p("something else");
-//     })
-//
-//   );
-// });
-//
-// console.log(nodes);
-// document.getElementById("the_body").appendChild(nodes);
-//
 /*
-  *
-  */
+  * e('input', {name: "_something"}, "My Text")
+  * e('a.red#ID', {href: "https://some.url"}, "My Text")
+  * e('div', e('span', "My Text"))
+  * e('div#main', e('span', "My Text"))
+  * e('div#main',
+  *   e('span', "My Text"),
+  *   e('div', "My Text")
+  * )
+*/
+export function element(tag_name: string, ...pieces : (string | Element | Attributes)[]) {
+  const e = split_tag_name(tag_name);
+  pieces.forEach((x, i) => {
+    if (typeof x === "string")
+      return e.appendChild(document.createTextNode(x));
+    if (is_plain_object(x))
+      return set_attrs(e, x);
+    e.appendChild(x as Element);
+  });
+  return e;
+} // export function
+
+
