@@ -1,6 +1,9 @@
-
 {
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "mocha": "latest",
+    "chai": "latest"
+  },
+  "dependencies": {
   }
 }
