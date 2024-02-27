@@ -1,4 +1,4 @@
-// src/index.ts
+// src/index.mts
 function is_func(x) {
   return typeof x === "function";
 }

@@ -18,8 +18,7 @@ case "$*" in
     set -x
     rm -rf build
     mkdir build
-    bun build --target browser src/index.ts --outdir build
-    mv build/index.js build/html.mjs
+    bun build --target browser src/index.mts --outfile build/html.mjs
     set +x
     tree build
     ;;
