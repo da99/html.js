@@ -11,6 +11,19 @@ case "$*" in
     echo "$0 serve test"
     echo
     ;;
+
+  "build")
+    cd "$(dirname "$(realpath "$0")")"/..
+    echo "=== $PWD"
+    set -x
+    rm -rf build
+    mkdir build
+    bun build --target browser src/index.ts --outdir build
+    mv build/index.js build/html.mjs
+    set +x
+    tree build
+    ;;
+
   "build test")
     set -x
     rm -rf build
