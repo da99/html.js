@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { element as E, body, is_urlish, is_plain_object, split_tag_name } from '../src/main.ts';
+import { element as E, body, is_urlish, is_plain_object, split_tag_name } from '../src/index.mts';
 
 describe('helper functions', function () {
   describe('is_urlish', function () {
@@ -71,6 +71,13 @@ describe('element', function () {
     const x = E('div', E('p', 'hello'), E('p', 'world'));
     assert.equal(x.innerHTML, '<p>hello</p><p>world</p>');
   });
+});
+
+describe('attributes', function () {
+  it('changes htmlFor to for', function () {
+    const x = E('label', {htmlFor: 'hello'}, 'Hello');
+    assert.equal(x.getAttribute('for'), 'hello')
+  })
 });
 
 describe('body', function () {

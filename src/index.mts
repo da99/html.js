@@ -1,5 +1,5 @@
 
-type Attributes = Partial<HTMLElement | HTMLAnchorElement>;
+type Attributes = Partial<HTMLElement | HTMLAnchorElement | HTMLInputElement | HTMLLabelElement>;
 
 const VALID_PROTO = /^(http|https|ssh|ftp|sftp|gopher):\/\//i;
 const ObjectPrototype = Object.getPrototypeOf({});
@@ -67,6 +67,9 @@ export function split_tag_name(new_class: string): Element {
 function set_attrs(ele: Element, attrs: Attributes) {
   for (const k in attrs) {
     switch (k) {
+      case 'htmlFor':
+        ele.setAttribute('for', attrs[k]);
+        break;
       case 'href':
         try {
           ele.setAttribute(k, (new URL(attrs['href'])).toString());
