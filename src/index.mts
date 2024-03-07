@@ -1,5 +1,6 @@
 
-type Attributes = Partial<HTMLElement | HTMLAnchorElement | HTMLInputElement | HTMLLabelElement>;
+// type Attributes = Partial<HTMLElement | HTMLAnchorElement | HTMLInputElement | HTMLLabelElement>;
+type Attributes = Partial<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
 
 const VALID_PROTO = /^(http|https|ssh|ftp|sftp|gopher):\/\//i;
 const ObjectPrototype = Object.getPrototypeOf({});
