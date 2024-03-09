@@ -108,4 +108,18 @@ export function element(tag_name: string, ...pieces : (string | Element | Attrib
   return e;
 } // export function
 
-
+export function form_data(f: HTMLFormElement) {
+  const raw_data = new FormData(f);
+  const data = {};
+  raw_data.forEach((v, k) => {
+    if (data.hasOwnProperty(k)) {
+      if(!Array.isArray(data[k]))
+        data[k] = [data[k]];
+      data[k].push(v);
+    } else
+      data[k] = v;
+  });
+  // for (let [k, v] of raw_data.) {
+  // }
+  return data;
+} // export function

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { element as E, body, is_urlish, is_plain_object, split_tag_name } from '../src/index.mts';
+import { element as E, body, form_data, is_urlish, is_plain_object, split_tag_name } from '../src/index.mts';
 
 describe('helper functions', function () {
   describe('is_urlish', function () {
@@ -88,7 +88,23 @@ describe('body', function () {
 
   it('appends the elements to the body', function () {
     const p = E('p#h2', 'hello world 2');
-    const b = body(p);
+    body(p);
     assert.equal(p, document.body.children[document.body.children.length - 1]);
+  });
+});
+
+describe('form_data', function () {
+  it('returns an object', function () {
+    const data = form_data(E('form', E('input', {name: 'msg', type: 'hidden', value: 'hello'})));
+    assert.deepEqual(data, {msg: 'hello'});
+  });
+  it('returns an object with arrays for multiple values', function () {
+    const data = form_data(
+      E('form',
+        E('input', {name: 'msg', type: 'hidden', value: 'hello1'}),
+        E('input', {name: 'msg', type: 'hidden', value: 'hello2'})
+      )
+    );
+    assert.deepEqual(data, {msg: ['hello1', 'hello2']});
   });
 });
