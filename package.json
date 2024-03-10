@@ -1,9 +1,9 @@
 {
   "devDependencies": {
+    "@types/node": "latest",
     "@types/bun": "latest",
     "mocha": "latest",
     "chai": "latest"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

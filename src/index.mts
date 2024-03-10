@@ -111,15 +111,34 @@ export function element(tag_name: string, ...pieces : (string | Element | Attrib
 export function form_data(f: HTMLFormElement) {
   const raw_data = new FormData(f);
   const data = {};
-  raw_data.forEach((v, k) => {
+  for (let [k,v] of raw_data.entries()) {
     if (data.hasOwnProperty(k)) {
       if(!Array.isArray(data[k]))
         data[k] = [data[k]];
       data[k].push(v);
     } else
       data[k] = v;
-  });
-  // for (let [k, v] of raw_data.) {
-  // }
+  }
   return data;
+} // export function
+
+function handle_form_post<K extends keyof HTMLElementEventMap>(ev: HTMLElementEventMap[K]) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  const e = ev.target as HTMLElement;
+  const form = e.closest('form');
+  if (!form) {
+    console.warn('Form not found for: ' + e.tagName);
+    return false;
+  }
+
+  const action = form.getAttribute('action');
+  console.warn(`clicked on form to: ${action}`);
+
+  return false;
+}
+
+export function form_post(b: Element) {
+  b.addEventListener('click', handle_form_post);
+  return b;
 } // export function
