@@ -122,7 +122,24 @@ export function form_data(f: HTMLFormElement) {
   return data;
 } // export function
 
-function handle_form_post<K extends keyof HTMLElementEventMap>(ev: HTMLElementEventMap[K]) {
+function handle_form_fetch_error(error: any) {
+  console.warn(`Form error: ${error.message}`);
+}
+
+async function handle_form_response(resp: Response) {
+  if (resp.ok) {
+    console.warn(`Form response: ${resp.status}`);
+  }
+  const json = await resp.json();
+  if (json.__target) {
+    console.warn(`         body: ${json}`);
+    document.getElementById(json.__target)?.dispatchEvent(new CustomEvent("formOK", {detail: json}));
+  } else {
+    console.warn(`Target not found: ${json}`);
+  }
+}
+
+function handle_form_post(ev: HTMLElementEventMap[keyof HTMLElementEventMap]) {
   ev.preventDefault();
   ev.stopPropagation();
   const e = ev.target as HTMLElement;
@@ -133,7 +150,21 @@ function handle_form_post<K extends keyof HTMLElementEventMap>(ev: HTMLElementEv
   }
 
   const action = form.getAttribute('action');
-  console.warn(`clicked on form to: ${action}`);
+  const f_data = form_data(form);
+  f_data["__target"] = form.id || "[NONE]";
+
+  fetch(action, {
+    method: "POST",
+    referrerPolicy: "no-referrer",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Sent-Via": "makee.js"
+    },
+    body: JSON.stringify(f_data)
+  })
+  .then(handle_form_response)
+  .catch(handle_form_fetch_error);
 
   return false;
 }
