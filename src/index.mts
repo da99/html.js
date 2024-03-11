@@ -123,13 +123,15 @@ export function form_data(f: HTMLFormElement) {
 } // export function
 
 function handle_form_fetch_error(error: any) {
-  console.warn(`Form error: ${error.message}`);
+  console.warn(`Form fetch error: ${error.message}`);
 }
 
 async function handle_form_response(resp: Response) {
-  if (resp.ok) {
-    console.warn(`Form response: ${resp.status}`);
+  if (!resp.ok) {
+    console.warn(`Form response error: ${resp.status} - ${resp.statusText}`);
+    return false;
   }
+  console.warn(`Form response: ${resp.status}`);
   const json = await resp.json();
   if (json.__target) {
     console.warn(`         body: ${json}`);
