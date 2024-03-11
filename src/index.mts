@@ -139,6 +139,11 @@ async function handle_form_response(resp: Response) {
   }
 }
 
+/*
+  * This is also used for CSRF protection.
+*/
+export const X_SENT_FROM = "X-Sent-From";
+
 function handle_form_post(ev: HTMLElementEventMap[keyof HTMLElementEventMap]) {
   ev.preventDefault();
   ev.stopPropagation();
@@ -150,18 +155,18 @@ function handle_form_post(ev: HTMLElementEventMap[keyof HTMLElementEventMap]) {
   }
 
   const action = form.getAttribute('action');
-  const f_data = form_data(form);
-  f_data["__target"] = form.id || "[NONE]";
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  headers[X_SENT_FROM] = form.getAttribute('id') || "[NONE]";
 
+  console.warn(headers);
   fetch(action, {
     method: "POST",
     referrerPolicy: "no-referrer",
     cache: "no-cache",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Sent-Via": "makee.js"
-    },
-    body: JSON.stringify(f_data)
+    headers: headers,
+    body: JSON.stringify(form_data(form))
   })
   .then(handle_form_response)
   .catch(handle_form_fetch_error);
